@@ -1,0 +1,33 @@
+{% extends 'users/base.html' %}
+
+{% block title %}Welcome to AI Chat Hub{% endblock %}
+{% load static %}
+{% block background_css %}
+<style>
+    body {
+        background: url("{% static 'users/backgrounds/pexels-tara-winstead-8386440.jpg' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="text-center mt-5">
+    <h1 class="display-4">Welcome to <span class="text-primary">AI Chat Hub</span></h1>
+    <p class="lead mt-3">Talk to multiple AI personalities in real-time. Chat, collaborate, and explore ideas together.</p>
+    <p class="text-muted">Multiple users can join conversations — it's like a group chat, but with intelligent assistants.</p>
+
+    {% if not user.is_authenticated %}
+        <div class="mt-4">
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-2">Get Started</a>
+            <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-lg">Login</a>
+        </div>
+    {% else %}
+        <div class="mt-4">
+            <a href="{% url 'dashboard' %}" class="btn btn-success btn-lg">Go to Dashboard</a>
+        </div>
+    {% endif %}
+
+    
+</div>
+{% endblock %}

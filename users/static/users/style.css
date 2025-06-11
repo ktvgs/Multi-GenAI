@@ -1,0 +1,39 @@
+/* Global white text */
+body, h1, h2, h3, h4, h5, h6, p, a, label, span, div {
+    color: white !important;
+}
+
+/* Black form inputs */
+input.form-control,
+textarea.form-control,
+select.form-control {
+    background-color: black !important;
+    color: white !important;
+    border: 1px solid white !important;
+}
+
+/* Card (message bubble) styling */
+.card {
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    border: none;
+    color: white !important;
+}
+
+.card-body {
+    color: white !important;
+}
+
+/* List group styling (dashboard) */
+.list-group-item {
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    color: white !important;
+    border: none;
+}
+
+.list-group-item a {
+    color: white !important;
+    text-decoration: none;
+}
+.list-group-item a:hover {
+    text-decoration: underline;
+}

@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}AI Dashboard{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'users/style.css' %}">
+    {% block background_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'index' %}">AI Site</a>
+            <div class="d-flex align-items-center">
+                {% if user.is_authenticated %}
+                    <span class="navbar-text text-white me-3">Hello, {{ user.username }}!</span>
+                    <form method="POST" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-light" type="submit">Logout</button>
+                    </form>
+                {% else %}
+                    <a class="btn btn-outline-light" href="{% url 'login' %}">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

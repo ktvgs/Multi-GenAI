@@ -1,0 +1,31 @@
+{% extends 'users/base.html' %}
+{% load static %}
+{% block background_css %}
+<style>
+    body {
+        background: url("{% static 'users/backgrounds/pexels-tara-winstead-8386356.jpg' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>Your Conversations</h2>
+<a href="{% url 'new_conversation' %}" class="btn btn-primary">New Conversation</a>
+
+<ul class="list-group mt-4">
+    {% for convo in conversations %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <a href="{% url 'conversation_detail' convo.id %}">
+                    {{ convo.title|default:"(No title yet)" }}
+                </a>
+                {% if convo.parent_id %}
+                    <span class="badge bg-info text-dark ms-2">Branch</span>
+                {% endif %}
+            </div>
+            <a href="{% url 'delete_conversation' convo.id %}" class="btn btn-danger btn-sm">Delete</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

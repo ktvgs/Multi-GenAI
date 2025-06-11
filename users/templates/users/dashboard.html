@@ -1,0 +1,25 @@
+{% extends 'users/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% load static %}
+{% block background_css %}
+<style>
+    body {
+        background: url("{% static 'users/backgrounds/pexels-pixabay-276452.jpg' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="dashboard-text">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Welcome, {{ request.user.username }}!</h2>
+    
+</div>
+
+<p>This is your AI dashboard. You can add your features here!</p>
+
+<!-- Add Button to Go to Conversations Page -->
+<a href="{% url 'conversations_dashboard' %}" class="btn btn-primary mt-3">Go to Conversations</a>
+
+</div>
+{% endblock %}
