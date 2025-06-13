@@ -1,0 +1,20 @@
+{% load conversation_extras %}
+
+<div class="mb-3">
+    <div class="card {% if msg.sender == 'user' %}text-end{% endif %}">
+        <div class="card-body py-2 px-3">
+            <small><strong>{{ msg.sender|title }}</strong></small><br>
+            {{ msg.text|linebreaks }}
+
+            {% if msg.sender == 'ai' %}
+                <a href="{% url 'branch_conversation' conv_id=conv_id %}?message_id={{ msg.id }}" class="btn btn-sm btn-outline-light mt-2">Branch</a>
+            {% endif %}
+
+            {% with branch=branches_by_msg_id|get_item:msg.id %}
+                {% if branch %}
+                    <a href="{% url 'conversation_detail' branch.id %}" class="btn btn-sm btn-info mt-2">View Branch</a>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+</div>

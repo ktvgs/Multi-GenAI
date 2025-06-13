@@ -15,8 +15,8 @@ urlpatterns = [
     path('conversation/<uuid:conv_id>/branch/', views.branch_conversation, name='branch_conversation'),
     path("conversation/<str:conv_id>/share/", views.share_conversation_view, name="share_conversation"),
     path("conversation/<str:conv_id>/revoke/<int:user_id>/", views.revoke_conversation_access, name="revoke_access"),
-    path('conversations/<str:conv_id>/side_chat/send/', views.send_side_chat_message, name='send_side_chat_message'),
-
-
+    path('conversations/<str:conv_id>/side_chat/send/', views.send_side_chat_message_htmx, name='send_side_chat_message_htmx'),
+    path('conversations/<str:conv_id>/htmx/add/', views.add_chat_message_htmx, name='add_chat_message_htmx'),
+    
 
 ]

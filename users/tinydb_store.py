@@ -85,3 +85,6 @@ def add_side_chat_message(conv_id, user_id, text):
 
 def get_side_chat_messages(conv_id):
     return side_chat_messages.search(Query().conversation_id == str(conv_id))
+
+from tinydb import Query
+

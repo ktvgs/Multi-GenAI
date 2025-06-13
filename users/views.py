@@ -181,32 +181,33 @@ from django.contrib.auth.models import User
 
 from django.contrib import messages
 
+from django.template.loader import render_to_string
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
+
 @login_required
 def share_conversation_view(request, conv_id):
     convo = get_conversation(conv_id)
     if not convo or convo["user_id"] != str(request.user.id):
-        messages.error(request, "Access denied.")
-        return redirect("conversation_detail", conv_id=conv_id)
+        return HttpResponseForbidden("Access denied")
 
     if request.method == "POST":
         username = request.POST.get("username")
         try:
             user_to_share = User.objects.get(username=username)
         except User.DoesNotExist:
-            messages.error(request, f"User '{username}' not found.")
-            return redirect("conversation_detail", conv_id=conv_id)
+            return HttpResponseNotFound("User not found")
 
         success = share_conversation_with_user(conv_id, user_to_share.id)
-        if success:
-            messages.success(request, f"Conversation shared with {username}.")
-        else:
-            messages.error(request, "Failed to share conversation.")
+        if success and request.headers.get("Hx-Request"):
+            shared_user_html = render_to_string("users/partials/shared_user.html", {
+                "user": user_to_share,
+                "conv_id": conv_id
+            }, request=request)
+            return HttpResponse(shared_user_html)
 
         return redirect("conversation_detail", conv_id=conv_id)
 
     return HttpResponse("Invalid method")
-
-from django.views.decorators.http import require_POST
 
 @require_POST
 @login_required
@@ -219,22 +220,76 @@ def revoke_conversation_access(request, conv_id, user_id):
     shared.discard(str(user_id))
     conversations.update({"shared_with": list(shared)}, Query().id == conv_id)
 
+    if request.headers.get("Hx-Request"):
+        return HttpResponse("")  # Tell HTMX to remove this element
     return redirect("conversation_detail", conv_id=conv_id)
+
+
+from django.template.loader import render_to_string
 
 @require_POST
 @login_required
-def send_side_chat_message(request, conv_id):
+def send_side_chat_message_htmx(request, conv_id):
     convo = get_conversation(conv_id)
     if not convo or not user_can_access_conversation(request.user.id, convo):
         return JsonResponse({"error": "Access denied"}, status=403)
 
     message = request.POST.get("message", "").strip()
-    if message:
-        add_side_chat_message(conv_id, request.user.id, message)
-        return JsonResponse({
-            "text": message,
-            "username": request.user.username,
-            "timestamp": datetime.now().strftime("%b %d, %H:%M")
-        })
+    if not message:
+        return JsonResponse({"error": "Empty message"}, status=400)
 
-    return JsonResponse({"error": "Empty message"}, status=400)
+    add_side_chat_message(conv_id, request.user.id, message)
+
+    user = request.user
+    msg = {
+        "id": "temp",  # if you don’t track id
+        "user_id": str(user.id),
+        "username": user.username,
+        "text": message,
+        "timestamp": datetime.now().strftime("%b %d, %H:%M"),
+    }
+
+    html = render_to_string("users/partials/side_chat_message.html", {"msg": msg})
+    return HttpResponse(html)
+
+
+from django.template.loader import render_to_string
+from django.http import HttpResponse
+
+@login_required
+@require_POST
+def add_chat_message_htmx(request, conv_id):
+    # Your message handling logic here...
+    user_msg = request.POST.get("message", "").strip()
+    model = request.POST.get("model", "gemini")
+
+    if user_msg:
+        add_message(conv_id, "user", user_msg, user_id=str(request.user.id))
+
+        if model == "gemini":
+            ai_reply = call_gemini(user_msg)
+        elif model == "groq":
+            ai_reply = call_groq(user_msg)
+        else:
+            ai_reply = "Unknown model selected."
+
+        add_message(conv_id, "ai", ai_reply)
+
+    chat_messages = get_messages(conv_id)[-2:]  # last two: user + ai
+
+    # 🧠 Render both messages to string
+    user_msg_html = render_to_string("users/partials/chat_message.html", {
+        "msg": chat_messages[0],
+        "conv_id": conv_id
+    }, request=request)
+
+    ai_msg_html = render_to_string("users/partials/chat_message.html", {
+        "msg": chat_messages[1],
+        "conv_id": conv_id
+    }, request=request)
+
+    # ✅ Concatenate both into one response
+    return HttpResponse(user_msg_html + ai_msg_html)
+
+
+
