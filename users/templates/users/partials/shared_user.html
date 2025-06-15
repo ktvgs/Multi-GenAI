@@ -1,0 +1,10 @@
+<div id="shared-user-{{ user.id }}" class="d-flex justify-content-between align-items-center mb-2">
+    <span>{{ user.username }}</span>
+    <form method="POST" 
+          hx-post="{% url 'revoke_access' conv_id=conv_id user_id=user.id %}" 
+          hx-target="#shared-user-{{ user.id }}" 
+          hx-swap="outerHTML">
+        {% csrf_token %}
+        <button class="btn btn-danger btn-sm">Revoke</button>
+    </form>
+</div>
